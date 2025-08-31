@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }} - سیستم تیکتینگ</title>
+    <title>{% block title %}سیستم تیکتینگ{% endblock %} - هلپ دسک</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body>
 
@@ -33,6 +34,13 @@
                     {% endif %}
                 {% endif %}
             </ul>
+
+            <div class="d-flex align-items-center me-3">
+                <a href="#" class="nav-link text-light" id="theme-switcher">
+                    <i class="fas fa-moon"></i>
+                </a>
+            </div>
+            
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
@@ -45,7 +53,7 @@
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="btn btn-light" href="{{ url_for('login') }}">ورود</a>
+                        <a class="btn btn-light btn-sm" href="{{ url_for('login') }}">ورود</a>
                     </li>
                 {% endif %}
             </ul>
@@ -53,7 +61,7 @@
     </div>
 </nav>
 
-<main class="container mb-5">
+<main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -68,5 +76,37 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 800,
+    once: true,
+  });
+</script>
+
+<script>
+    const themeSwitcher = document.getElementById('theme-switcher');
+    const themeIcon = themeSwitcher.querySelector('i');
+    const htmlEl = document.documentElement;
+
+    const setTheme = (theme) => {
+        htmlEl.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        } else {
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+    };
+
+    const currentTheme = localStorage.getItem('theme');
+    setTheme(currentTheme || 'light');
+
+    themeSwitcher.addEventListener('click', (e) => {
+        e.preventDefault();
+        const newTheme = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+    });
+</script>
 </body>
 </html>

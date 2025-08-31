@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}جزئیات تیکت #{{ ticket.id }}{% endblock %}
+
 {% block content %}
-<div class="card mb-4">
+<div class="card mb-4" data-aos="fade-up">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">موضوع: {{ ticket.title }}</h4>
         <span class="status-badge status-{{ ticket.status.replace('_', '-') }}">{{ ticket.status }}</span>
@@ -25,7 +27,7 @@
 </div>
 
 {% if current_user.role in ['admin', 'supervisor'] and agents and ticket.status != 'deleted' %}
-<div class="card mb-4">
+<div class="card mb-4" data-aos="fade-up">
     <div class="card-body">
         <h5 class="card-title">تخصیص به کارشناس</h5>
         <form action="{{ url_for('assign_ticket', ticket_id=ticket.id) }}" method="POST">
@@ -38,16 +40,16 @@
                         </option>
                     {% endfor %}
                 </select>
-                <button class="btn btn-outline-secondary" type="submit">تخصیص</button>
+                <button class="btn btn-outline-primary" type="submit">تخصیص</button>
             </div>
         </form>
     </div>
 </div>
 {% endif %}
 
-<h3 class="mb-3">پاسخ‌ها</h3>
+<h3 class="mb-3" data-aos="fade-up">پاسخ‌ها</h3>
 {% for reply in replies %}
-<div class="card mb-3 {% if reply.user.role == 'customer' %}border-primary{% else %}border-success{% endif %}">
+<div class="card mb-3 {% if reply.user.role == 'customer' %}border-primary{% else %}border-success{% endif %}" data-aos="fade-up">
     <div class="card-header bg-light">
         <strong>{{ reply.user.username }}</strong> <span class="text-muted">({{ reply.user.role }})</span>
         <span class="float-end text-muted">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -57,13 +59,13 @@
     </div>
 </div>
 {% else %}
-<div class="alert alert-secondary">هنوز پاسخی برای این تیکت ثبت نشده است.</div>
+<div class="alert alert-info" data-aos="fade-up">هنوز پاسخی برای این تیکت ثبت نشده است.</div>
 {% endfor %}
 
 <hr>
 
 {% if ticket.status != 'deleted' %}
-<div class="card mb-4">
+<div class="card mb-4" data-aos="fade-up">
     <div class="card-body">
         <h5 class="card-title">ثبت پاسخ جدید</h5>
         <form method="POST">
@@ -76,23 +78,24 @@
 </div>
 {% endif %}
 
-<h3 class="mb-3">تاریخچه تیکت</h3>
+<h3 class="mb-3" data-aos="fade-up">تاریخچه تیکت</h3>
+<div class="timeline" data-aos="fade-up">
 {% for log in ticket.logs|reverse %}
-<div class="log-entry">
-    <div class="log-meta">
-        <span class="fw-bold">{{ log.user.username }}</span>
-        در تاریخ {{ log.created_at.strftime('%Y-%m-%d %H:%M') }}
-        یک رویداد ثبت کرد:
+    <div class="timeline-item">
+        <div class="log-meta">
+            <span class="fw-bold">{{ log.user.username }}</span>
+            در تاریخ {{ log.created_at.strftime('%Y-%m-%d %H:%M') }}
+            یک رویداد ثبت کرد:
+        </div>
+        <div class="log-details">
+            <strong>{{ log.action }}</strong>
+            {% if log.details %}
+                <small class="d-block text-muted">{{ log.details }}</small>
+            {% endif %}
+        </div>
     </div>
-    <div class="log-details">
-        <strong>{{ log.action }}</strong>
-        {% if log.details %}
-            <small class="d-block text-muted">{{ log.details }}</small>
-        {% endif %}
-    </div>
-</div>
 {% else %}
-<div class="alert alert-secondary">تاریخچه‌ای برای این تیکت ثبت نشده است.</div>
+    <p>تاریخچه‌ای برای این تیکت ثبت نشده است.</p>
 {% endfor %}
-
+</div>
 {% endblock %}

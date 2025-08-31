@@ -1,51 +1,60 @@
 {% extends "base.html" %}
 
+{% block title %}داشبورد{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-chart-line me-2"></i>داشبورد مانیتورینگ</h1>
 </div>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-6 col-lg-3">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body text-center"><h5 class="card-title">کل تیکت‌ها</h5>
-                <p class="card-text display-4 fw-bold">{{ stats.total_tickets }}</p>
+    <div class="col-md-6 col-lg-3" data-aos="fade-up">
+        <div class="card stat-card bg-primary-themed h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">کل تیکت‌ها</h5>
+                <p class="card-text display-4">{{ stats.total_tickets }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="card bg-warning text-dark h-100">
-            <div class="card-body text-center"><h5 class="card-title">تیکت‌های باز</h5>
-                <p class="card-text display-4 fw-bold">{{ stats.open_tickets }}</p>
+    
+    <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="card stat-card bg-warning-themed h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">تیکت‌های باز</h5>
+                <p class="card-text display-4">{{ stats.open_tickets }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body text-center"><h5 class="card-title">در حال بررسی</h5>
-                <p class="card-text display-4 fw-bold">{{ stats.in_progress_tickets }}</p>
+
+    <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="card stat-card bg-info-themed h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">در حال بررسی</h5>
+                <p class="card-text display-4">{{ stats.in_progress_tickets }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body text-center"><h5 class="card-title">تیکت‌های جدید امروز</h5>
-                <p class="card-text display-4 fw-bold">{{ stats.new_tickets_today }}</p>
+    
+    <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="card stat-card bg-success-themed h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">تیکت‌های جدید امروز</h5>
+                <p class="card-text display-4">{{ stats.new_tickets_today }}</p>
             </div>
         </div>
     </div>
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-6">
+    <div class="col-lg-6" data-aos="fade-right">
         <div class="card">
             <div class="card-header"><h5><i class="fas fa-users me-2"></i>بار کاری کارشناسان</h5></div>
             <div class="card-body p-0">
-                <table class="table table-striped mb-0">
-                    <thead><tr><th>نام کارشناس</th><th>تعداد تیکت‌های فعال</th></tr></thead>
+                <table class="table table-striped mb-0 align-middle">
+                    <thead><tr><th>نام کارشناس</th><th class="text-center">تعداد تیکت‌های فعال</th></tr></thead>
                     <tbody>
                     {% for agent, count in stats.agent_workload.items() %}
-                        <tr><td>{{ agent }}</td><td><span class="badge bg-secondary rounded-pill fs-6">{{ count }}</span></td></tr>
+                        <tr><td>{{ agent }}</td><td class="text-center"><span class="badge bg-secondary rounded-pill fs-6">{{ count }}</span></td></tr>
                     {% else %}
                         <tr><td colspan="2" class="text-center">هیچ کارشناسی تعریف نشده است.</td></tr>
                     {% endfor %}
@@ -54,7 +63,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-6">
+    <div class="col-lg-6" data-aos="fade-left">
         <div class="card">
             <div class="card-header"><h5><i class="fas fa-history me-2"></i>آخرین تیکت‌های به‌روز شده</h5></div>
             <div class="card-body p-0">

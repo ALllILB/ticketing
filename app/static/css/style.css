@@ -1,48 +1,164 @@
-/* ticketing/app/static/css/style.css */
+/* =================================================================
+   1. متغیرهای اصلی (رنگ‌ها و فونت)
+   ================================================================= */
+:root {
+    /* --- پالت رنگی اصلی --- */
+    --primary-color: #4A90E2;      /* آبی اصلی */
+    --primary-hover-color: #357ABD;
+    --dark-color: #2c3e50;         /* سرمه‌ای تیره برای Navbar و متون */
+    
+    /* --- پالت رنگی برای وضعیت‌ها --- */
+    --success-color: #20c997;      /* سبز دودی (Teal) */
+    --warning-color: #fd7e14;      /* نارنجی گرم (Orange) */
+    --danger-color: #e74c3c;       /* قرمز مرجانی (Coral Red) */
+    --secondary-color: #869ab0;    /* خاکستری-آبی سرد (Slate Gray) */
+    --info-color: #3498db;         /* آبی اطلاعاتی برای داشبورد */
 
-body {
-    background-color: #f8f9fa;
-    font-family: 'Vazirmatn', sans-serif;
+    /* --- رنگ‌های پس‌زمینه و حاشیه --- */
+    --light-gray-color: #f8f9fa;
+    --border-color: #eaedf1;
+    --font-family: 'Vazirmatn', sans-serif;
+    
+    /* --- متغیرهای سایه برای افکت 3D --- */
+    --btn-shadow: 0 6px 12px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
+    --btn-hover-shadow: 0 8px 16px rgba(0,0,0,0.25), 0 3px 6px rgba(0,0,0,0.15);
+    --btn-active-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.card {
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    border: none;
+/* =================================================================
+   2. استایل‌های کلی بدنه و تایپوگرافی
+   ================================================================= */
+body { background-color: var(--light-gray-color); font-family: var(--font-family); color: #333; }
+h1, h2, h3, h4, h5, h6 { font-weight: 700; color: var(--dark-color); margin-bottom: 1rem; }
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.75rem; }
+p, li, td, th { line-height: 1.7; }
+a { color: var(--primary-color); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--primary-hover-color); }
+
+/* =================================================================
+   3. شخصی‌سازی کامپوننت‌های بوت‌استرپ
+   ================================================================= */
+.navbar.bg-dark { background-color: var(--dark-color) !important; }
+.btn { position: relative; font-weight: 500; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s ease-in-out; box-shadow: var(--btn-shadow); }
+.btn:hover { box-shadow: var(--btn-hover-shadow); transform: translateY(-2px); }
+.btn:active { box-shadow: var(--btn-active-shadow); transform: translateY(1px); }
+.btn-primary { background-color: var(--primary-color); }
+.btn-primary:hover { background-color: var(--primary-hover-color); }
+.btn-success { background-color: var(--success-color); }
+.btn-success:hover { background-color: #1ba982; }
+.btn-warning { background-color: var(--warning-color); color: #fff; }
+.btn-warning:hover { background-color: #e46d0b; }
+.btn-danger { background-color: var(--danger-color); }
+.btn-danger:hover { background-color: #d63a2a; }
+.btn-secondary { background-color: var(--secondary-color); }
+.btn-secondary:hover { background-color: #71859b; }
+.btn-light { background-color: #f8f9fa; border: 1px solid #dee2e6; color: #333;}
+.btn-light:hover { background-color: #e2e6ea; }
+
+.card { border-radius: 0.75rem; border: 1px solid var(--border-color); border-top: 4px solid var(--primary-color); transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; box-shadow: 0 8px 25px rgba(0,0,0,0.1), 0 3px 6px rgba(0,0,0,0.08); }
+.card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.1); }
+.card-header { background-color: #fff; border-bottom: 1px solid var(--border-color); font-weight: 700; padding: 1rem 1.25rem; }
+.form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.25); }
+
+/* =================================================================
+   4. کلاس‌های سفارشی پروژه
+   ================================================================= */
+.status-badge { font-size: 0.8em; padding: 0.4em 0.8em; border-radius: 50rem; color: #fff; min-width: 90px; text-align: center; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.status-open { background-color: var(--primary-color); }
+.status-in-progress { background-color: var(--warning-color); color: #fff !important; }
+.status-answered { background-color: var(--success-color); }
+.status-closed { background-color: var(--secondary-color); }
+.status-deleted { background-color: var(--danger-color); }
+
+.timeline { position: relative; padding-left: 25px; border-left: 3px solid var(--border-color); }
+.timeline-item { position: relative; margin-bottom: 20px; }
+.timeline-item::before { content: ''; position: absolute; right: -35px; top: 5px; width: 15px; height: 15px; border-radius: 50%; background-color: var(--secondary-color); border: 3px solid var(--light-gray-color); box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+
+.login-form-container { max-width: 450px; margin-top: 5rem; }
+
+/* =================================================================
+   5. استایل‌های سفارشی داشبورد
+   ================================================================= */
+.stat-card { color: #fff; border: none; border-top: none; }
+.stat-card .card-title { font-weight: 500; opacity: 0.9; }
+.stat-card .card-text { font-weight: 700; }
+.stat-card.bg-primary-themed { background: linear-gradient(45deg, #4A90E2, #357ABD); }
+.stat-card.bg-warning-themed { background: linear-gradient(45deg, #fd7e14, #f39c12); color: #fff !important; }
+.stat-card.bg-success-themed { background: linear-gradient(45deg, #20c997, #1abc9c); }
+.stat-card.bg-info-themed { background: linear-gradient(45deg, #3498db, #2980b9); }
+
+/* =================================================================
+   6. بهبود فضای خالی (White Space)
+   ================================================================= */
+main.container { margin-bottom: 5rem !important; }
+.card + .card { margin-top: 2rem; }
+h1 + .card, h1 + .row { margin-top: 2rem; }
+
+/* =================================================================
+   7. حالت تاریک (Dark Mode) - نسخه کامل و نهایی
+   ================================================================= */
+[data-theme="dark"] {
+    --primary-color: #5ea1e9;
+    --primary-hover-color: #7ab3f0;
+    --dark-color: #e4e6eb; /* رنگ متن روشن */
+    --light-gray-color: #18191a; /* پس‌زمینه اصلی */
+    --border-color: #3a3b3c;
+    --card-bg: #242526;
+    --navbar-bg: #242526;
 }
 
-.status-badge {
-    font-size: 0.85em;
-    padding: 0.4em 0.7em;
-    border-radius: 0.25rem;
-    color: #fff;
-    min-width: 90px;
-    text-align: center;
-    font-weight: 500;
+[data-theme="dark"] body { background-color: var(--light-gray-color); color: var(--dark-color); }
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6 { color: var(--dark-color); }
+
+/* استایل برای لینک‌های داخل نوار بالا */
+[data-theme="dark"] .navbar-brand,
+[data-theme="dark"] .navbar-nav .nav-link {
+    color: var(--dark-color) !important;
+}
+[data-theme="dark"] .navbar-nav .nav-link:hover {
+    color: var(--primary-color) !important;
 }
 
-.status-open { background-color: #0d6efd; }
-.status-in-progress { background-color: #ffc107; color: #000 !important; }
-.status-answered { background-color: #198754; }
-.status-closed { background-color: #6c757d; }
-.status-deleted { background-color: #dc3545; }
+[data-theme="dark"] .navbar.bg-dark { background-color: var(--navbar-bg) !important; border-bottom: 1px solid var(--border-color); }
+[data-theme="dark"] .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-top-color: var(--primary-color); }
+[data-theme="dark"] .card-header { background-color: transparent; border-bottom: 1px solid var(--border-color); }
+[data-theme="dark"] .form-control, [data-theme="dark"] .form-select { background-color: #3a3b3c; color: var(--dark-color); border-color: #4e4f50; }
+[data-theme="dark"] .form-control:focus, [data-theme="dark"] .form-select:focus { background-color: #3a3b3c; color: var(--dark-color); }
+[data-theme="dark"] .form-control::placeholder { color: #8a8d91; }
 
-.log-entry {
-    border-left: 3px solid #dee2e6;
-    padding-left: 15px;
-    margin-bottom: 20px;
+/* استایل‌های کامل برای جدول در حالت تاریک */
+[data-theme="dark"] .table { 
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--border-color);
+    color: var(--dark-color); /* این خط رنگ پیش‌فرض متن جدول را تنظیم می‌کند */
+}
+[data-theme="dark"] .table > :not(caption) > * > * {
+    background-color: transparent !important;
+}
+[data-theme="dark"] .table-light { 
+    --bs-table-bg: #303132; 
+    --bs-table-border-color: var(--border-color);
+}
+[data-theme="dark"] .table thead th {
+    color: var(--dark-color); 
+}
+[data-theme="dark"] .table-hover > tbody > tr:hover > * { 
+    --bs-table-hover-bg: #3a3b3c; 
+    color: var(--dark-color);
+}
+/* FIX: این خط جدید مشکل رنگ متن ردیف‌های جدول را حل می‌کند */
+[data-theme="dark"] .table > tbody > tr > td {
+    color: var(--dark-color);
 }
 
-.log-entry .log-meta {
-    font-size: 0.9em;
-    color: #6c757d;
-}
 
-.login-container {
-    max-width: 400px;
-    margin: 5rem auto;
-    padding: 2rem;
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
-}
+[data-theme="dark"] .list-group-item { background-color: transparent; border-color: var(--border-color); }
+[data-theme="dark"] .dropdown-menu { background-color: var(--card-bg); border-color: var(--border-color); }
+[data-theme="dark"] .dropdown-item { color: var(--dark-color); }
+[data-theme="dark"] .dropdown-item:hover { background-color: var(--primary-color); color: #fff; }
+[data-theme="dark"] hr { border-top-color: var(--border-color); opacity: 0.5; }
+[data-theme="dark"] .text-muted { color: #8a8d91 !important; }
+[data-theme="dark"] .timeline-item::before { background-color: var(--secondary-color); border-color: var(--card-bg); }
+[data-theme="dark"] .btn-light { background-color: #4e4f50; border-color: #5a5b5c; color: #fff;}
+[data-theme="dark"] .btn-light:hover { background-color: #5a5b5c; }
