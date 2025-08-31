@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-users-cog me-2"></i>مدیریت کاربران</h1>
+    <a href="{{ url_for('create_user') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> افزودن کاربر جدید
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col" class="ps-3">#</th>
+                    <th scope="col">نام کاربری</th>
+                    <th scope="col">نقش</th>
+                    <th scope="col">تاریخ عضویت</th>
+                    <th scope="col" class="text-center">عملیات</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                <tr>
+                    <th scope="row" class="ps-3">{{ user.id }}</th>
+                    <td>{{ user.username }}</td>
+                    <td><span class="badge bg-secondary">{{ user.role }}</span></td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i> ویرایش
+                        </a>
+                        
+                        {% if user.id != current_user.id %}
+                        <form action="{{ url_for('delete_user_route', user_id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('آیا از حذف این کاربر مطمئن هستید؟');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash-alt"></i> حذف
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center p-4">هیچ کاربری برای نمایش وجود ندارد.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

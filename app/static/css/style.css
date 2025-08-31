@@ -1,0 +1,48 @@
+/* ticketing/app/static/css/style.css */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    border: none;
+}
+
+.status-badge {
+    font-size: 0.85em;
+    padding: 0.4em 0.7em;
+    border-radius: 0.25rem;
+    color: #fff;
+    min-width: 90px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.status-open { background-color: #0d6efd; }
+.status-in-progress { background-color: #ffc107; color: #000 !important; }
+.status-answered { background-color: #198754; }
+.status-closed { background-color: #6c757d; }
+.status-deleted { background-color: #dc3545; }
+
+.log-entry {
+    border-left: 3px solid #dee2e6;
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.log-entry .log-meta {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 5rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+}

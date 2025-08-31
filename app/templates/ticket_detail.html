@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">موضوع: {{ ticket.title }}</h4>
+        <span class="status-badge status-{{ ticket.status.replace('_', '-') }}">{{ ticket.status }}</span>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ ticket.content }}</p>
+        <div class="mt-3">
+            {% if (ticket.created_by == current_user or current_user.role in ['admin', 'supervisor']) and ticket.status != 'deleted' %}
+                <a href="{{ url_for('edit_ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-warning">ویرایش</a>
+            {% endif %}
+            {% if current_user.role in ['admin', 'supervisor'] and ticket.status != 'deleted' %}
+                <form action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}" method="POST" class="d-inline" onsubmit="return confirm('آیا از حذف این تیکت مطمئن هستید؟');">
+                    <button type="submit" class="btn btn-sm btn-danger">حذف</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        ایجاد شده توسط: {{ ticket.created_by.username }} در تاریخ {{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </div>
+</div>
+
+{% if current_user.role in ['admin', 'supervisor'] and agents and ticket.status != 'deleted' %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">تخصیص به کارشناس</h5>
+        <form action="{{ url_for('assign_ticket', ticket_id=ticket.id) }}" method="POST">
+            <div class="input-group">
+                <select class="form-select" name="agent_id">
+                    <option selected disabled>یک کارشناس انتخاب کنید...</option>
+                    {% for agent in agents %}
+                        <option value="{{ agent.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == agent.id %}selected{% endif %}>
+                            {{ agent.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-outline-secondary" type="submit">تخصیص</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<h3 class="mb-3">پاسخ‌ها</h3>
+{% for reply in replies %}
+<div class="card mb-3 {% if reply.user.role == 'customer' %}border-primary{% else %}border-success{% endif %}">
+    <div class="card-header bg-light">
+        <strong>{{ reply.user.username }}</strong> <span class="text-muted">({{ reply.user.role }})</span>
+        <span class="float-end text-muted">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ reply.content }}</p>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-secondary">هنوز پاسخی برای این تیکت ثبت نشده است.</div>
+{% endfor %}
+
+<hr>
+
+{% if ticket.status != 'deleted' %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">ثبت پاسخ جدید</h5>
+        <form method="POST">
+            <div class="mb-3">
+                <textarea class="form-control" name="reply_content" rows="4" required placeholder="پاسخ خود را اینجا بنویسید..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">ارسال پاسخ</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<h3 class="mb-3">تاریخچه تیکت</h3>
+{% for log in ticket.logs|reverse %}
+<div class="log-entry">
+    <div class="log-meta">
+        <span class="fw-bold">{{ log.user.username }}</span>
+        در تاریخ {{ log.created_at.strftime('%Y-%m-%d %H:%M') }}
+        یک رویداد ثبت کرد:
+    </div>
+    <div class="log-details">
+        <strong>{{ log.action }}</strong>
+        {% if log.details %}
+            <small class="d-block text-muted">{{ log.details }}</small>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-secondary">تاریخچه‌ای برای این تیکت ثبت نشده است.</div>
+{% endfor %}
+
+{% endblock %}

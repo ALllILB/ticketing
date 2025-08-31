@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<hr>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="">
+            <div class="mb-3">
+                <label for="username" class="form-label">نام کاربری</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user.username if user else '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">رمز عبور</label>
+                <input type="password" class="form-control" id="password" name="password" 
+                       placeholder="{{ 'در صورت عدم تغییر، خالی بگذارید' if user else '' }}"
+                       {{ 'required' if not user }}>
+                {% if user %}
+                <div class="form-text">برای تغییر ندادن رمز عبور، این فیلد را خالی بگذارید.</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="role" class="form-label">نقش کاربر</label>
+                <select class="form-select" id="role" name="role" required>
+                    <option selected disabled value="">یک نقش را انتخاب کنید...</option>
+                    {% set roles = ['customer', 'agent', 'supervisor', 'admin'] %}
+                    {% for role in roles %}
+                        <option value="{{ role }}" {{ 'selected' if user and user.role == role }}>
+                            {{ role|capitalize }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-1"></i> ذخیره
+            </button>
+            <a href="{{ url_for('list_users') }}" class="btn btn-secondary">انصراف</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
