@@ -1,0 +1,13 @@
+[Unit]
+Description=Ticketing System
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/path/to/ticketing
+Environment=PATH=/path/to/ticketing/venv/bin
+ExecStart=/path/to/ticketing/venv/bin/python run.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
