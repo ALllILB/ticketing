@@ -19,43 +19,45 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('list_tickets') }}">لیست تیکت‌ها</a>
-                    </li>
-                    {% if current_user.role in ['admin', 'supervisor'] %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard') }}">داشبورد</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('list_users') }}">مدیریت کاربران</a>
-                    </li>
-                    {% endif %}
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('list_tickets') }}">
+                        <i class="fas fa-ticket-alt me-1"></i> تیکت‌ها
+                    </a>
+                </li>
+                {% if current_user.role in ['admin', 'supervisor'] %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">
+                        <i class="fas fa-chart-line me-1"></i> داشبورد
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cogs me-1"></i> مدیریت
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminMenu">
+                        <li><a class="dropdown-item" href="{{ url_for('list_users') }}">مدیریت کاربران</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('list_categories') }}">مدیریت دسته‌بندی‌ها</a></li>
+                    </ul>
+                </li>
                 {% endif %}
             </ul>
-
-            <div class="d-flex align-items-center me-3">
-                <a href="#" class="nav-link text-light" id="theme-switcher">
-                    <i class="fas fa-moon"></i>
-                </a>
-            </div>
-            
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            {{ current_user.username }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">خروج</a></li>
-                        </ul>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-light btn-sm" href="{{ url_for('login') }}">ورود</a>
-                    </li>
-                {% endif %}
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="#">پروفایل</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-1"></i> خروج</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="theme-switcher">
+                        <i class="fas fa-moon"></i>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -108,5 +110,6 @@
         setTheme(newTheme);
     });
 </script>
+
 </body>
 </html>
