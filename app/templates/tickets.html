@@ -32,7 +32,7 @@
                         <th scope="row" class="ps-3">{{ ticket.id }}</th>
                         <td><a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}">{{ ticket.title }}</a></td>
                         <td>{{ ticket.created_by.username }}</td>
-                        <td><span class="status-badge status-{{ ticket.status.replace('_', '-') }}">{{ ticket.status }}</span></td>
+                        <td><span class="status-badge status-{{ ticket.status.name.lower().replace('_', '-') }}">{{ ticket.status.value }}</span></td>
                         <td>{{ ticket.assigned_to.username if ticket.assigned_to else '-' }}</td>
                     </tr>
                     {% endif %}
