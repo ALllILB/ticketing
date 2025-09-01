@@ -61,9 +61,13 @@ def get_ticket_by_id(ticket_id):
     return None
 
 def get_tickets_for_user(user):
-    if user.role in ['admin', 'supervisor']: return DB['tickets']
-    if user.role == 'agent': return [t for t in DB['tickets'] if t.assigned_to == user or t.assigned_to is None]
-    if user.role == 'customer': return [t for t in DB['tickets'] if t.created_by == user]
+    if user.role == 'customer':
+        return [t for t in DB['tickets'] if t.created_by.id == user.id]
+    elif user.role in ['admin', 'supervisor']:
+        return DB['tickets']
+    elif user.role == 'agent':
+        # کارشناس فقط تیکت‌های تخصیص‌داده شده به خودش را می‌بیند
+        return [t for t in DB['tickets'] if t.assigned_to and t.assigned_to.id == user.id]
     return []
 
 def create_new_ticket(title, content, creator_user, category):
@@ -192,7 +196,6 @@ def create_initial_data():
     agent2 = create_new_user("agent2", "123", "agent")
     customer1 = create_new_user("customer1", "123", "customer")
 
-    # ایجاد دسته‌بندی‌های پیش‌فرض
     default_categories = [
         "سامانه", "غذا", "سیستم ورود و خروج", "اتوماسیون اداری",
         "چاپگر، اسکنر و فکس", "سخت افزاری", "نرم افزاری", "شبکه",
@@ -203,9 +206,10 @@ def create_initial_data():
     for name in default_categories:
         create_new_category(name)
 
-    # ایجاد تیکت نمونه
     cat_software = get_category_by_name("نرم افزاری")
     t1 = create_new_ticket("مشکل در ورود به نرم‌افزار", "نمی‌توانم وارد سیستم شوم.", customer1, cat_software)
+    t2 = create_new_ticket("عدم دسترسی به اینترنت", "اینترنت قطع شده است.", customer1, get_category_by_name("شبکه"))
     assign_ticket_to_agent(t1, agent1, supervisor)
+    assign_ticket_to_agent(t2, agent2, supervisor)
 
 create_initial_data()
