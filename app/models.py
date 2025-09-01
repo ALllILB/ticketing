@@ -1,6 +1,7 @@
 # ticketing/app/models.py
 
 import datetime
+from enum import Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -28,13 +29,22 @@ class User(Base, UserMixin):
     def __repr__(self):
         return f"<User {self.username}>"
 
+# تعریف Enum برای وضعیت‌های تیکت
+class TicketStatus(Enum):
+    OPEN = "درحال بررسی"
+    ANSWERED = "پاسخ داده شده"
+    DONE = "انجام شده"
+    CLOSED = "بسته شده"
+    DELETED = "حذف شده" # وضعیت جدید برای تیکت های حذف شده
+
 class Ticket(Base):
     def __init__(self, title, content, created_by_user):
         super().__init__()
         self.title = title
         self.content = content
         self.created_by = created_by_user
-        self.status = "open"  # وضعیت‌های ممکن: open, in_progress, answered, closed, deleted
+        # استفاده از Enum برای وضعیت تیکت
+        self.status = TicketStatus.OPEN
         self.assigned_to = None
         self.logs = []  # لیستی برای نگهداری تاریخچه تغییرات تیکت
 
@@ -42,7 +52,7 @@ class Ticket(Base):
         if agent_user.role != "agent":
             raise ValueError("تیکت فقط می‌تواند به کارشناس (agent) تخصیص داده شود.")
         self.assigned_to = agent_user
-        self.status = "in_progress"
+        self.status = TicketStatus.OPEN
 
 class Reply(Base):
     def __init__(self, ticket, user, content):
