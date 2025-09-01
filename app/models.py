@@ -1,9 +1,9 @@
 # ticketing/app/models.py
 
 import datetime
-from enum import Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from enum import Enum
 
 # یک کلاس پایه برای مدیریت شناسه و زمان ایجاد به صورت خودکار
 class Base:
@@ -18,12 +18,10 @@ class User(Base, UserMixin):
     def __init__(self, username, password, role="customer"):
         super().__init__()
         self.username = username
-        # رمز عبور به صورت هش شده ذخیره می‌شود
         self.password_hash = generate_password_hash(password)
         self.role = role
 
     def check_password(self, password):
-        """بررسی می‌کند که آیا رمز عبور ورودی با هش ذخیره شده مطابقت دارد یا خیر."""
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
@@ -32,27 +30,33 @@ class User(Base, UserMixin):
 # تعریف Enum برای وضعیت‌های تیکت
 class TicketStatus(Enum):
     OPEN = "درحال بررسی"
+    IN_PROGRESS = "در حال انجام"
     ANSWERED = "پاسخ داده شده"
-    DONE = "انجام شده"
     CLOSED = "بسته شده"
-    DELETED = "حذف شده" # وضعیت جدید برای تیکت های حذف شده
+    DELETED = "حذف شده"
+
+# کلاس جدید برای دسته‌بندی‌های تیکت
+class Category(Base):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
 
 class Ticket(Base):
-    def __init__(self, title, content, created_by_user):
+    def __init__(self, title, content, created_by_user, category):
         super().__init__()
         self.title = title
         self.content = content
         self.created_by = created_by_user
-        # استفاده از Enum برای وضعیت تیکت
+        self.category = category  # اضافه کردن فیلد دسته‌بندی
         self.status = TicketStatus.OPEN
         self.assigned_to = None
-        self.logs = []  # لیستی برای نگهداری تاریخچه تغییرات تیکت
+        self.logs = []
 
     def assign_to(self, agent_user):
         if agent_user.role != "agent":
             raise ValueError("تیکت فقط می‌تواند به کارشناس (agent) تخصیص داده شود.")
         self.assigned_to = agent_user
-        self.status = TicketStatus.OPEN
+        self.status = TicketStatus.IN_PROGRESS
 
 class Reply(Base):
     def __init__(self, ticket, user, content):
@@ -66,5 +70,5 @@ class LogEntry(Base):
         super().__init__()
         self.ticket = ticket
         self.user = user
-        self.action = action  # مثلا: 'ایجاد', 'ویرایش', 'تخصیص'
-        self.details = details # توضیحات بیشتر
+        self.action = action
+        self.details = details
