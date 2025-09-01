@@ -6,16 +6,15 @@
 <div class="card mb-4" data-aos="fade-up">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">موضوع: {{ ticket.title }}</h4>
-        <span class="status-badge status-{{ ticket.status.name.lower() }}">{{ ticket.status.value }}</span>
+        <span class="status-badge status-{{ ticket.status.name.replace('_', '-').lower() }}">{{ ticket.status.value }}</span>
     </div>
     <div class="card-body">
         <p class="card-text">{{ ticket.content }}</p>
+        <hr>
+        <p><strong>دسته‌بندی:</strong> {{ ticket.category.name if ticket.category else '-' }}</p>
         <div class="mt-3">
-            {% if (ticket.created_by == current_user or current_user.role in ['admin', 'supervisor']) and ticket.status.name != 'CLOSED' %}
+            {% if (ticket.created_by == current_user or current_user.role in ['admin', 'supervisor']) and ticket.status.name != 'DELETED' %}
                 <a href="{{ url_for('edit_ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-warning">ویرایش</a>
-                <form action="{{ url_for('close_ticket', ticket_id=ticket.id) }}" method="POST" class="d-inline" onsubmit="return confirm('آیا از بستن این تیکت مطمئن هستید؟');">
-                    <button type="submit" class="btn btn-sm btn-info text-white">بستن تیکت</button>
-                </form>
             {% endif %}
             {% if current_user.role in ['admin', 'supervisor'] and ticket.status.name != 'DELETED' %}
                 <form action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}" method="POST" class="d-inline" onsubmit="return confirm('آیا از حذف این تیکت مطمئن هستید؟');">
@@ -29,33 +28,12 @@
     </div>
 </div>
 
-{% if current_user.role in ['admin', 'supervisor'] and agents and ticket.status.name != 'CLOSED' and ticket.status.name != 'DELETED' %}
-<div class="card mb-4" data-aos="fade-up">
-    <div class="card-body">
-        <h5 class="card-title">تخصیص به کارشناس</h5>
-        <form action="{{ url_for('assign_ticket', ticket_id=ticket.id) }}" method="POST">
-            <div class="input-group">
-                <select class="form-select" name="agent_id">
-                    <option selected disabled>یک کارشناس انتخاب کنید...</option>
-                    {% for agent in agents %}
-                        <option value="{{ agent.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == agent.id %}selected{% endif %}>
-                            {{ agent.username }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <button class="btn btn-outline-primary" type="submit">تخصیص</button>
-            </div>
-        </form>
-    </div>
-</div>
-{% endif %}
-
-<h3 class="mb-3" data-aos="fade-up">پاسخ‌ها</h3>
+<h3 class="mt-5 mb-3" data-aos="fade-up">پاسخ‌ها</h3>
 {% for reply in replies %}
-<div class="card mb-3 {% if reply.user.role == 'customer' %}border-primary{% else %}border-success{% endif %}" data-aos="fade-up">
-    <div class="card-header bg-light">
-        <strong>{{ reply.user.username }}</strong> <span class="text-muted">({{ reply.user.role }})</span>
-        <span class="float-end text-muted">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+<div class="card mb-3" data-aos="fade-up">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-bold">{{ reply.user.username }}</span>
+        <span class="text-muted">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
     </div>
     <div class="card-body">
         <p class="card-text">{{ reply.content }}</p>
@@ -67,7 +45,7 @@
 
 <hr>
 
-{% if ticket.status.name != 'CLOSED' and ticket.status.name != 'DELETED' %}
+{% if ticket.status.name != 'DELETED' %}
 <div class="card mb-4" data-aos="fade-up">
     <div class="card-body">
         <h5 class="card-title">ثبت پاسخ جدید</h5>
@@ -90,15 +68,12 @@
             در تاریخ {{ log.created_at.strftime('%Y-%m-%d %H:%M') }}
             یک رویداد ثبت کرد:
         </div>
-        <div class="log-details">
-            <strong>{{ log.action }}</strong>
-            {% if log.details %}
-                <small class="d-block text-muted">{{ log.details }}</small>
-            {% endif %}
-        </div>
+        <div class="log-details">{{ log.action }} {% if log.details %} ({{ log.details }}) {% endif %}</div>
     </div>
 {% else %}
-    <p>تاریخچه‌ای برای این تیکت ثبت نشده است.</p>
+    <div class="timeline-item">
+        <div class="log-details">تاریخچه‌ای برای این تیکت وجود ندارد.</div>
+    </div>
 {% endfor %}
 </div>
 {% endblock %}
