@@ -118,14 +118,15 @@ def assign_ticket(ticket_id):
 
 @app.route('/ticket/<int:ticket_id>/close', methods=['POST'])
 @login_required
-def close_ticket(ticket_id):
+def close_ticket_route(ticket_id):
     ticket = get_ticket_by_id(ticket_id)
     if not ticket:
         abort(404)
-    if ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor']:
+    if ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor', 'agent']:
         abort(403)
-    if ticket.status != TicketStatus.CLOSED:
-        update_ticket_status(ticket, current_user, TicketStatus.CLOSED)
+    if ticket.status != 'closed':
+        ticket.status = 'closed'
+        add_log_to_ticket(ticket, current_user, 'بستن تیکت')
         flash('تیکت با موفقیت بسته شد.', 'success')
     else:
         flash('این تیکت قبلاً بسته شده است.', 'info')
@@ -240,18 +241,4 @@ def delete_category_route(category_id):
     flash('دسته‌بندی با موفقیت حذف شد.', 'info')
     return redirect(url_for('list_categories'))
 
-# روت جدید برای بستن تیکت
-@app.route('/ticket/<int:ticket_id>/close', methods=['POST'])
-@login_required
-def close_ticket(ticket_id):
-    ticket = get_ticket_by_id(ticket_id)
-    if not ticket:
-        abort(404)
-    if ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor']:
-        abort(403)
-    if ticket.status != TicketStatus.CLOSED:
-        update_ticket_status(ticket, current_user, TicketStatus.CLOSED)
-        flash('تیکت با موفقیت بسته شد.', 'success')
-    else:
-        flash('این تیکت قبلاً بسته شده است.', 'info')
-    return redirect(url_for('ticket_detail', ticket_id=ticket.id))
+
