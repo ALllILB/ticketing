@@ -11,6 +11,16 @@
                 <input type="text" class="form-control" id="title" name="title" value="{{ ticket.title }}" required>
             </div>
             <div class="mb-3">
+                <label for="category" class="form-label">دسته‌بندی</label>
+                <select class="form-select" id="category" name="category_id" required>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if ticket.category and ticket.category.id == category.id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
                 <label for="content" class="form-label">توضیحات</label>
                 <textarea class="form-control" id="content" name="content" rows="5" required>{{ ticket.content }}</textarea>
             </div>
