@@ -1,10 +1,12 @@
+# ticketing/app/routes.py
+
 from flask import render_template, request, redirect, url_for, abort, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
 # نمونه app را مستقیما از پکیج app (یعنی از فایل __init__.py) وارد می‌کنیم
 from app import app
 from .services import *
-from .models import User
+from .models import User, TicketStatus
 
 # --- روت‌های احراز هویت ---
 @app.route('/login', methods=['GET', 'POST'])
@@ -143,7 +145,7 @@ def edit_user(user_id):
                 user_id=user.id,
                 new_username=request.form['username'],
                 new_role=request.form['role'],
-                new_password=request.form['password']  # اگر خالی باشد، در سرویس نادیده گرفته می‌شود
+                new_password=request.form['password']
             )
             flash(f"اطلاعات کاربر '{user.username}' با موفقیت به‌روز شد.", "success")
             return redirect(url_for('list_users'))
@@ -157,77 +159,6 @@ def edit_user(user_id):
 def delete_user_route(user_id):
     if current_user.role not in ['admin', 'supervisor']: abort(403)
     
-    # جلوگیری از حذف کاربر فعلی توسط خودش
-    if user_id == current_user.id:
-        flash("شما نمی‌توانید حساب کاربری خود را حذف کنید.", "danger")
-        return redirect(url_for('list_users'))
-        
-    user = get_user_by_id(user_id)
-    if user:
-        delete_user(user_id)
-        flash(f"کاربر '{user.username}' با موفقیت حذف شد.", "info")
-    
-    return redirect(url_for('list_users'))
-# --- روت‌های مدیریت و مانیتورینگ ---
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    if current_user.role not in ['admin', 'supervisor']: abort(403)
-    stats = get_dashboard_stats()
-    return render_template('dashboard.html', title="داشبورد مانیتورینگ", stats=stats)
-
-@app.route('/users')
-@login_required
-def list_users():
-    if current_user.role not in ['admin', 'supervisor']: abort(403)
-    users = get_all_users()
-    return render_template('admin/user_list.html', title="مدیریت کاربران", users=users)
-
-@app.route('/users/new', methods=['GET', 'POST'])
-@login_required
-def create_user():
-    if current_user.role not in ['admin', 'supervisor']: abort(403)
-    if request.method == 'POST':
-        try:
-            create_new_user(
-                request.form['username'],
-                request.form['password'],
-                request.form['role']
-            )
-            flash(f"کاربر '{request.form['username']}' با موفقیت ایجاد شد.", "success")
-            return redirect(url_for('list_users'))
-        except ValueError as e:
-            flash(str(e), "danger")
-    return render_template('admin/user_form.html', title="افزودن کاربر جدید", user=None)
-
-@app.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
-@login_required
-def edit_user(user_id):
-    if current_user.role not in ['admin', 'supervisor']: abort(403)
-    user = get_user_by_id(user_id)
-    if not user: abort(404)
-
-    if request.method == 'POST':
-        try:
-            update_user(
-                user_id=user.id,
-                new_username=request.form['username'],
-                new_role=request.form['role'],
-                new_password=request.form['password']  # اگر خالی باشد، در سرویس نادیده گرفته می‌شود
-            )
-            flash(f"اطلاعات کاربر '{user.username}' با موفقیت به‌روز شد.", "success")
-            return redirect(url_for('list_users'))
-        except ValueError as e:
-            flash(str(e), "danger")
-    
-    return render_template('admin/user_form.html', title="ویرایش کاربر", user=user)
-
-@app.route('/users/<int:user_id>/delete', methods=['POST'])
-@login_required
-def delete_user_route(user_id):
-    if current_user.role not in ['admin', 'supervisor']: abort(403)
-    
-    # جلوگیری از حذف کاربر فعلی توسط خودش
     if user_id == current_user.id:
         flash("شما نمی‌توانید حساب کاربری خود را حذف کنید.", "danger")
         return redirect(url_for('list_users'))
@@ -246,14 +177,13 @@ def close_ticket(ticket_id):
     ticket = get_ticket_by_id(ticket_id)
     if not ticket:
         abort(404)
-    # فقط کاربر اصلی یا ادمین/ناظر می‌تواند تیکت را ببندد
+    
     if ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor']:
         abort(403)
     
     if ticket.status != TicketStatus.CLOSED:
         ticket.status = TicketStatus.CLOSED
-        # نیاز به یک تابع در services.py برای ذخیره تغییر
-        update_ticket_status(ticket, current_user, TicketStatus.CLOSED.value)
+        update_ticket_status(ticket, current_user, TicketStatus.CLOSED)
         flash('تیکت با موفقیت بسته شد.', 'success')
     else:
         flash('این تیکت قبلاً بسته شده است.', 'info')
