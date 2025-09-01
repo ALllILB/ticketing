@@ -20,11 +20,20 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
+                {% if current_user.role == 'customer' or current_user.role in ['admin', 'supervisor'] %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('list_tickets') }}">
                         <i class="fas fa-ticket-alt me-1"></i> تیکت‌ها
                     </a>
                 </li>
+                {% endif %}
+                {% if current_user.role == 'agent' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('agent_tickets') }}">
+                        <i class="fas fa-tasks me-1"></i> تیکت‌های اختصاصی من
+                    </a>
+                </li>
+                {% endif %}
                 {% if current_user.role in ['admin', 'supervisor'] %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('dashboard') }}">
