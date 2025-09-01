@@ -35,6 +35,16 @@ def list_tickets():
     user_tickets = get_tickets_for_user(current_user)
     return render_template('tickets.html', tickets=user_tickets, title="لیست تیکت‌ها")
 
+# روت اختصاصی برای کارشناسان
+@app.route('/agent/tickets')
+@login_required
+def agent_tickets():
+    if current_user.role != 'agent':
+        abort(403)
+    assigned_tickets = get_tickets_for_user(current_user)
+    return render_template('agent_dashboard.html', tickets=assigned_tickets, title="تیکت‌های اختصاصی من")
+
+
 @app.route('/ticket/new', methods=['GET', 'POST'])
 @login_required
 def create_ticket():
@@ -229,3 +239,19 @@ def delete_category_route(category_id):
     delete_category(category_id)
     flash('دسته‌بندی با موفقیت حذف شد.', 'info')
     return redirect(url_for('list_categories'))
+
+# روت جدید برای بستن تیکت
+@app.route('/ticket/<int:ticket_id>/close', methods=['POST'])
+@login_required
+def close_ticket(ticket_id):
+    ticket = get_ticket_by_id(ticket_id)
+    if not ticket:
+        abort(404)
+    if ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor']:
+        abort(403)
+    if ticket.status != TicketStatus.CLOSED:
+        update_ticket_status(ticket, current_user, TicketStatus.CLOSED)
+        flash('تیکت با موفقیت بسته شد.', 'success')
+    else:
+        flash('این تیکت قبلاً بسته شده است.', 'info')
+    return redirect(url_for('ticket_detail', ticket_id=ticket.id))
