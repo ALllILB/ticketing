@@ -2,8 +2,6 @@
 
 from flask import render_template, request, redirect, url_for, abort, flash
 from flask_login import login_user, logout_user, login_required, current_user
-
-# نمونه app را مستقیما از پکیج app (یعنی از فایل __init__.py) وارد می‌کنیم
 from app import app
 from .services import *
 from .models import User, TicketStatus
@@ -42,11 +40,18 @@ def list_tickets():
 def create_ticket():
     if current_user.role != 'customer':
         abort(403)
+    categories = get_all_categories()
     if request.method == 'POST':
-        create_new_ticket(request.form['title'], request.form['content'], current_user)
+        category_id = request.form['category_id']
+        category = get_category_by_id(int(category_id))
+        if not category:
+            flash('دسته‌بندی انتخاب شده معتبر نیست.', 'danger')
+            return redirect(url_for('create_ticket'))
+        
+        create_new_ticket(request.form['title'], request.form['content'], current_user, category)
         flash('تیکت شما با موفقیت ثبت شد.', 'success')
         return redirect(url_for('list_tickets'))
-    return render_template('create_ticket.html', title="ایجاد تیکت جدید")
+    return render_template('create_ticket.html', title="ایجاد تیکت جدید", categories=categories)
 
 @app.route('/ticket/<int:ticket_id>', methods=['GET', 'POST'])
 @login_required
@@ -69,11 +74,12 @@ def edit_ticket(ticket_id):
     ticket = get_ticket_by_id(ticket_id)
     if not ticket or (ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor']):
         abort(403)
+    categories = get_all_categories()
     if request.method == 'POST':
         edit_ticket_content(ticket, request.form['title'], request.form['content'], current_user)
         flash('تیکت با موفقیت ویرایش شد.', 'success')
         return redirect(url_for('ticket_detail', ticket_id=ticket.id))
-    return render_template('edit_ticket.html', ticket=ticket, title="ویرایش تیکت")
+    return render_template('edit_ticket.html', ticket=ticket, title="ویرایش تیکت", categories=categories)
 
 @app.route('/ticket/<int:ticket_id>/delete', methods=['POST'])
 @login_required
@@ -98,6 +104,21 @@ def assign_ticket(ticket_id):
     if ticket and agent:
         assign_ticket_to_agent(ticket, agent, current_user)
         flash(f"تیکت به {agent.username} تخصیص داده شد.", "success")
+    return redirect(url_for('ticket_detail', ticket_id=ticket.id))
+
+@app.route('/ticket/<int:ticket_id>/close', methods=['POST'])
+@login_required
+def close_ticket(ticket_id):
+    ticket = get_ticket_by_id(ticket_id)
+    if not ticket:
+        abort(404)
+    if ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor']:
+        abort(403)
+    if ticket.status != TicketStatus.CLOSED:
+        update_ticket_status(ticket, current_user, TicketStatus.CLOSED)
+        flash('تیکت با موفقیت بسته شد.', 'success')
+    else:
+        flash('این تیکت قبلاً بسته شده است.', 'info')
     return redirect(url_for('ticket_detail', ticket_id=ticket.id))
 
 # --- روت‌های مدیریت و مانیتورینگ ---
@@ -138,7 +159,6 @@ def edit_user(user_id):
     if current_user.role not in ['admin', 'supervisor']: abort(403)
     user = get_user_by_id(user_id)
     if not user: abort(404)
-
     if request.method == 'POST':
         try:
             update_user(
@@ -151,41 +171,61 @@ def edit_user(user_id):
             return redirect(url_for('list_users'))
         except ValueError as e:
             flash(str(e), "danger")
-    
     return render_template('admin/user_form.html', title="ویرایش کاربر", user=user)
 
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 def delete_user_route(user_id):
     if current_user.role not in ['admin', 'supervisor']: abort(403)
-    
     if user_id == current_user.id:
         flash("شما نمی‌توانید حساب کاربری خود را حذف کنید.", "danger")
         return redirect(url_for('list_users'))
-        
     user = get_user_by_id(user_id)
     if user:
         delete_user(user_id)
         flash(f"کاربر '{user.username}' با موفقیت حذف شد.", "info")
-    
     return redirect(url_for('list_users'))
 
-# --- روت جدید برای بستن تیکت ---
-@app.route('/ticket/<int:ticket_id>/close', methods=['POST'])
+# --- روت‌های مدیریت دسته‌بندی‌ها ---
+@app.route('/categories')
 @login_required
-def close_ticket(ticket_id):
-    ticket = get_ticket_by_id(ticket_id)
-    if not ticket:
-        abort(404)
-    
-    if ticket.created_by != current_user and current_user.role not in ['admin', 'supervisor']:
-        abort(403)
-    
-    if ticket.status != TicketStatus.CLOSED:
-        ticket.status = TicketStatus.CLOSED
-        update_ticket_status(ticket, current_user, TicketStatus.CLOSED)
-        flash('تیکت با موفقیت بسته شد.', 'success')
-    else:
-        flash('این تیکت قبلاً بسته شده است.', 'info')
-        
-    return redirect(url_for('ticket_detail', ticket_id=ticket.id))
+def list_categories():
+    if current_user.role not in ['admin', 'supervisor']: abort(403)
+    categories = get_all_categories()
+    return render_template('admin/category_list.html', title="مدیریت دسته‌بندی‌ها", categories=categories)
+
+@app.route('/categories/new', methods=['GET', 'POST'])
+@login_required
+def create_category():
+    if current_user.role not in ['admin', 'supervisor']: abort(403)
+    if request.method == 'POST':
+        try:
+            create_new_category(request.form['name'])
+            flash('دسته‌بندی با موفقیت ایجاد شد.', 'success')
+            return redirect(url_for('list_categories'))
+        except ValueError as e:
+            flash(str(e), 'danger')
+    return render_template('admin/category_form.html', title="افزودن دسته‌بندی جدید")
+
+@app.route('/categories/<int:category_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_category(category_id):
+    if current_user.role not in ['admin', 'supervisor']: abort(403)
+    category = get_category_by_id(category_id)
+    if not category: abort(404)
+    if request.method == 'POST':
+        try:
+            update_category(category_id, request.form['name'])
+            flash('دسته‌بندی با موفقیت به‌روز شد.', 'success')
+            return redirect(url_for('list_categories'))
+        except ValueError as e:
+            flash(str(e), 'danger')
+    return render_template('admin/category_form.html', title="ویرایش دسته‌بندی", category=category)
+
+@app.route('/categories/<int:category_id>/delete', methods=['POST'])
+@login_required
+def delete_category_route(category_id):
+    if current_user.role not in ['admin', 'supervisor']: abort(403)
+    delete_category(category_id)
+    flash('دسته‌بندی با موفقیت حذف شد.', 'info')
+    return redirect(url_for('list_categories'))
